@@ -27,7 +27,10 @@ public class AccountService {
 
         System.out.print("Enter Last name: ");
         String lastName = scanner.nextLine().trim();
-        InputValidator.isNotEmpty(lastName);
+        if(!InputValidator.isNotEmpty(lastName)){
+            System.out.println("[ERROR] Last name cannot be empty!");
+            return;
+        }
 
         System.out.println("Enter Contact Number");
         String contactNumber = scanner.nextLine();
