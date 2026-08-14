@@ -24,12 +24,12 @@ public class AccountDaoImplementation implements AccountDao {
     @Override
     public void createAccount(Account account) throws SQLException {
         try(Connection connection = DbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SQL_CREATE_ACCOUNT)){
+            PreparedStatement preparedStatement = connection.prepareStatement(SQL_CREATE_ACCOUNT, Statement.RETURN_GENERATED_KEYS)){
 
             preparedStatement.setString(1, account.getAccountNumber());
             preparedStatement.setString(2, account.getAccountFirstName());
             preparedStatement.setString(3, account.getAccountLastName());
-            preparedStatement.setInt(4, account.getAccountContactNumber());
+            preparedStatement.setString(4, account.getAccountContactNumber());
             preparedStatement.setBigDecimal(5, account.getBalance());
             preparedStatement.executeUpdate();
 
@@ -121,7 +121,7 @@ public class AccountDaoImplementation implements AccountDao {
         account.setAccountNumber(resultSet.getString("account_number"));
         account.setAccountFirstName(resultSet.getString("first_name"));
         account.setAccountLastName(resultSet.getString("last_name"));
-        account.setAccountContactNumber(resultSet.getInt("contact_number"));
+        account.setAccountContactNumber(resultSet.getString("contact_number"));
         account.setBalance(resultSet.getBigDecimal("balance"));
 
         Timestamp createdAt = resultSet.getTimestamp("created_at");

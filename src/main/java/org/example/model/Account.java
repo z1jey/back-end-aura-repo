@@ -7,7 +7,7 @@ public class Account {
     private String accountNumber;
     private String accountFirstName;
     private String accountLastName;
-    private int accountContactNumber;
+    private String accountContactNumber;
     private BigDecimal balance;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -15,7 +15,7 @@ public class Account {
     public Account(){}
 
     //for creating account
-    public Account(String accountNumber, String accountFirstName, String accountLastName, int accountContactNumber, BigDecimal balance) {
+    public Account(String accountNumber, String accountFirstName, String accountLastName, String accountContactNumber, BigDecimal balance) {
         this.accountNumber = accountNumber;
         this.accountFirstName = accountFirstName;
         this.accountLastName = accountLastName;
@@ -55,11 +55,11 @@ public class Account {
         this.accountLastName = accountLastName;
     }
 
-    public int getAccountContactNumber() {
+    public String getAccountContactNumber() {
         return accountContactNumber;
     }
 
-    public void setAccountContactNumber(int accountContactNumber) {
+    public void setAccountContactNumber(String accountContactNumber) {
         this.accountContactNumber = accountContactNumber;
     }
 

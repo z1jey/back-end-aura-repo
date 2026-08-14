@@ -1,0 +1,31 @@
+# =============================================================================
+# Banking Management System — Application Configuration (EXAMPLE)
+# =============================================================================
+# Copy this file to: src/main/resources/application.properties
+# Fill in your actual database credentials.
+# NEVER commit the real application.properties to source control.
+# =============================================================================
+
+# JDBC connection URL (adjust host/port/database name as needed)
+db.url=
+
+# MySQL username
+db.username=
+
+# MySQL password
+db.password=
+
+# =============================================================================
+# Logging (rotating files under logs/)
+# =============================================================================
+# Active log file (relative to JVM working directory); archived when full
+log.file.path=logs/banking.log
+# Archived file prefix: banking-2026-07-21.log (see date pattern below)
+log.archive.base.name=banking
+log.archive.date.pattern=yyyy-MM-dd
+# Max size per file before rotating (bytes)
+log.file.limit.bytes=5242880
+# Number of archived log files to keep
+log.file.count=5
+# Root log level: SEVERE, WARNING, INFO, CONFIG, FINE, FINER, FINEST
+log.level=INFO

@@ -1,9 +1,11 @@
 package org.example.service;
 
 import org.example.dao.AccountDao;
+import org.example.model.Account;
 import org.example.util.InputValidator;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class AccountService {
@@ -53,15 +55,44 @@ public class AccountService {
 
         //asking for initial amount
         System.out.print("Enter Initial Amount: ");
-        String amount = scanner.nextLine().trim();
+        String initialBalance = scanner.nextLine().trim();
         //empty initial amount validation
-        if(!InputValidator.isNotEmpty(amount)){
+        if(!InputValidator.isNotEmpty(initialBalance)){
             System.out.println("[ERROR] Initial Amount cannot be empty!");
             return;
         }
+        BigDecimal initialDeposit = new BigDecimal(initialBalance);
         //amount checker validation
-        if(!InputValidator.isAmountValid(amount)){
+        if(!InputValidator.isAmountValid(initialBalance)){
             return;
+        }
+
+        String accountNumber = generateAccountNumber();
+        Account account = new Account(accountNumber, firstName, lastName, contactNumber, initialDeposit);
+
+        try {
+            accountDao.createAccount(account);
+            System.out.println("\n[SUCCESS] Account Created Successfully!");
+            printAccountSummary(account);
+        } catch(SQLException exception) {
+            System.out.println("Failed to create account for " + firstName);
+            System.out.println("[ERROR] " + exception.getMessage());
+        }
+
+    }
+
+    private String generateAccountNumber() {
+        long seed = System.currentTimeMillis() % 1_000_000_000L;
+        return String.format("ACC-%010d", seed);
+    }
+
+    private void printAccountSummary(Account account) {
+        System.out.println("  Account Number : " + account.getAccountNumber());
+        System.out.println("  Account Name   : " + account.getAccountFirstName() + " " + account.getAccountLastName());
+        System.out.println("  Account Contact Number: " + account.getAccountContactNumber());
+        System.out.printf("  Balance        : PHP %.2f%n", account.getBalance());
+        if (account.getCreatedAt() != null) {
+            System.out.println("  Created At     : " + account.getCreatedAt());
         }
     }
 }
