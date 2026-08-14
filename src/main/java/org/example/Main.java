@@ -24,11 +24,11 @@ public class Main {
 //        else {
 //            System.out.println("No username found!");
 //        }
-        UserDao userDao = new UserDaoImplementation();
-        Scanner scanner = new Scanner(System.in);
-        LoginService loginService = new LoginService(userDao, scanner);
-        loginService.login();
+//        UserDao userDao = new UserDaoImplementation();
+//        LoginService loginService = new LoginService(userDao, scanner);
+//        loginService.login();
 
+        Scanner scanner = new Scanner(System.in);
         AccountDao accountDao = new AccountDaoImplementation();
         AccountService accountService = new AccountService(accountDao, scanner);
 
