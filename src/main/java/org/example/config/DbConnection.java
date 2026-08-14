@@ -5,22 +5,24 @@ import java.sql.SQLException;
 
 
 public final class DbConnection {
-    private static final String PROP_URL ="db.url";
-    private static final String PROP_USERNAME = "db.username";
-    private static final String  PROP_PASSWORD = "db.password";
+    private static final String URL ="db.url";
+    private static final String USERNAME = "db.username";
+    private static final String  PASSWORD = "db.password";
 
     public DbConnection(){}
 
     public static Connection getConnection() throws SQLException {
         PropertyLoader config = PropertyLoader.getInstance();
-        String url = config.getProperty(PROP_URL);
-        String username = config.getProperty(PROP_USERNAME);
-        String password = config.getProperty(PROP_PASSWORD);
+        String url = config.getProperty(URL);
+        String username = config.getProperty(USERNAME);
+        String password = config.getProperty(PASSWORD);
 
         try {
             Connection connection = DriverManager.getConnection(url, username, password);
+            System.out.println("Connection established successfully!");
             return connection;
         } catch (SQLException e) {
+            e.printStackTrace();
             throw e;
         }
     }

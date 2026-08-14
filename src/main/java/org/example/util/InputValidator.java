@@ -1,5 +1,5 @@
 package org.example.util;
-
+import java.util.List;
 import java.math.BigDecimal;
 
 public class InputValidator {
@@ -7,7 +7,9 @@ public class InputValidator {
     public static boolean isNotEmpty(String value) {
         return value != null && !value.trim().isEmpty();
     }
-
+    public static boolean isListNotEmpty(List<?> list) {
+        return list != null && !list.isEmpty();
+    }
     public static boolean isContactNumberValid(String contactNumber) {
         contactNumber = contactNumber.replace("-", "").replace(" ", "").trim();
 
@@ -25,8 +27,6 @@ public class InputValidator {
             System.out.println("[ERROR] Contact number must be 11 digits");
             return false;
         }
-
-
         return true;
     }
 

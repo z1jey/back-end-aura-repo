@@ -4,8 +4,11 @@ import org.example.dao.AccountDao;
 import org.example.model.Account;
 import org.example.util.InputValidator;
 
+import javax.security.auth.login.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class AccountService {
@@ -20,7 +23,6 @@ public class AccountService {
 
     public void createAccountService(){
         System.out.println("\n========= CREATE ACCOUNT =========");
-
 
         //Asking for Firstname
         System.out.print("Enter First name: ");
@@ -81,6 +83,41 @@ public class AccountService {
 
     }
 
+    public void balanceInquiry(){
+        System.out.println("\n========= BALANCE INQUIRY =========");
+
+        System.out.print("Enter account number: ");
+        String accountNumber = scanner.nextLine().trim();
+
+        try{
+            Account account = findAccountOrThrow(accountNumber);
+            System.out.println("\n[SUCCESS] Balance Inquiry");
+            printAccountSummary(account);
+        } catch (AccountNotFoundException exception) {
+            System.out.println("[ERROR] " + exception.getMessage());
+        } catch (SQLException exception) {
+            System.out.println("[ERROR] Balance Inquiry failed for: " + accountNumber);
+            System.out.println("[ERROR] Database Error " + exception.getMessage());
+        }
+    }
+
+    public void listAccounts(){
+        System.out.println("\n========= LIST OF ALL ACCOUNTS =========");
+        try {
+            List<Account> accountList = accountDao.findAllAccounts();
+
+            if(!InputValidator.isListNotEmpty(accountList)){
+                System.out.println("[ERROR] No accounts found.");
+                return;
+            }
+            printAccountsTable(accountList);
+        } catch (SQLException exception) {
+            System.out.println("[ERROR] Failed to retrieve List accounts");
+            System.out.println("[ERROR] " + exception.getMessage());
+        }
+    }
+
+    //helpers
     private String generateAccountNumber() {
         long seed = System.currentTimeMillis() % 1_000_000_000L;
         return String.format("ACC-%010d", seed);
@@ -94,5 +131,38 @@ public class AccountService {
         if (account.getCreatedAt() != null) {
             System.out.println("  Created At     : " + account.getCreatedAt());
         }
+    }
+
+    public Account findAccountOrThrow(String accountNumber) throws AccountNotFoundException, SQLException {
+        Optional<Account> opt = accountDao.findByAccountNumber(accountNumber);
+        return opt.orElseThrow(() -> new AccountNotFoundException(accountNumber));
+    }
+
+    private void printAccountsTable(List<Account> accounts) {
+        String line = "+----+-----------------------+-------------------------+---------------+---------------+---------------------+";
+
+        System.out.println(line);
+        System.out.printf("| %-2s | %-21s | %-23s | %-13s | %-13s | %-19s |%n",
+                "No", "Account Number", "Account Name", "Contact Number", "Balance (PHP)", "Created At");
+        System.out.println(line);
+
+        int i = 1;
+
+        for (Account a : accounts) {
+            String accountName = a.getAccountFirstName() + " " + a.getAccountLastName();
+            System.out.printf("| %-2d | %-21s | %-23s | %-13s | %13.2f | %-19s |%n",
+                    i++,
+                    a.getAccountNumber(),
+                    accountName,
+                    a.getAccountContactNumber(),
+                    a.getBalance(),
+                    a.getCreatedAt() != null
+                            ? a.getCreatedAt().toString().replace("T", " ")
+                            : "—"
+            );
+        }
+
+        System.out.println(line);
+        System.out.println("  Total accounts: " + accounts.size());
     }
 }

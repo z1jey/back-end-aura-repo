@@ -32,6 +32,8 @@ public class Main {
         AccountDao accountDao = new AccountDaoImplementation();
         AccountService accountService = new AccountService(accountDao, scanner);
 
-        accountService.createAccountService();
+//        accountService.createAccountService();
+//        accountService.balanceInquiry();
+            accountService.listAccounts();
     }
 }
