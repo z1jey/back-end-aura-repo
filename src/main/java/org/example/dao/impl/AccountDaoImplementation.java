@@ -20,6 +20,8 @@ public class AccountDaoImplementation implements AccountDao {
             "SELECT * FROM accounts ORDER BY created_at ASC";
     private static final String SQL_UPDATE_BALANCE =
             "UPDATE accounts SET balance = ? WHERE account_number = ?";
+    private static final String SQL_DELETE_ACCOUNT =
+            "DELETE FROM accounts WHERE account_number = ?";
 
     @Override
     public void createAccount(Account account) throws SQLException {
@@ -41,7 +43,7 @@ public class AccountDaoImplementation implements AccountDao {
             System.out.println("Account Created Successfully!");
             System.out.println("Account Number: " + account.getAccountNumber());
             System.out.println("Account Holder Name: " + account.getAccountFirstName() + " " + account.getAccountLastName());
-            System.out.println("Account Contact Number: " + account.getAccountNumber());
+            System.out.println("Account Contact Number: " + account.getAccountContactNumber());
             System.out.println("Account with Initial Balance(₱): " + account.getBalance());
 
         } catch (SQLException sqlException) {
@@ -113,6 +115,28 @@ public class AccountDaoImplementation implements AccountDao {
             }
         }
     }
+
+    @Override
+    public void deleteAccount(String accountNumber) throws SQLException {
+
+        try (Connection connection = DbConnection.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_ACCOUNT)) {
+            preparedStatement.setString(1, accountNumber);
+            int rowsAffected = preparedStatement.executeUpdate();
+
+            if (rowsAffected == 0) {
+                throw new SQLException("[WARNING] No account found to delete: " + accountNumber);
+            }
+
+            System.out.println("[SUCCESS] Account deleted successfully: " + accountNumber);
+
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to delete account: " + accountNumber );
+            System.out.println("[ERROR] " + sqlException.getMessage());
+            throw sqlException;
+        }
+    }
+
 
     //helpers
     private Account mapRow(ResultSet resultSet) throws SQLException {

@@ -14,10 +14,19 @@ public class TransactionDaoImplementation implements TransactionDao {
                     "VALUES(?, ?, ?, ?, ?, ?)";
 
     private static final String SQL_FIND_BY_ACCOUNT =
-            "SELECT * FROM transactions WHERE account_number = ? ORDER BY created_at DESC";
+            "SELECT transaction_id, account_number, transaction_type, amount, balance_after, " +
+                    "       reference_number, remarks, created_at " +
+                    "FROM transactions " +
+                    "WHERE account_number = ? " +
+                    "ORDER BY created_at DESC";
 
     private static final String SQL_FIND_RECENT =
-            "SELECT * FROM transactions WHERE account_number = ? ORDER BY created_at DESC LIMIT = ?";
+            "SELECT transaction_id, account_number, transaction_type, amount, balance_after, " +
+                    "       reference_number, remarks, created_at " +
+                    "FROM transactions " +
+                    "WHERE account_number = ? " +
+                    "ORDER BY created_at DESC " +
+                    "LIMIT ?";
 
     @Override
     public void save(Transaction transaction) throws SQLException {
@@ -57,13 +66,15 @@ public class TransactionDaoImplementation implements TransactionDao {
         try(Connection connection = DbConnection.getConnection();
             PreparedStatement preparedStatement = connection.prepareStatement(SQL_FIND_BY_ACCOUNT)){
 
+            preparedStatement.setString(1, accountNumber);
+
             try(ResultSet resultSet = preparedStatement.executeQuery()){
                 while (resultSet.next()) {
                     results.add(mapRow(resultSet));
                 }
             }
         }
-        return List.of();
+        return results;
     }
 
     @Override
@@ -76,9 +87,9 @@ public class TransactionDaoImplementation implements TransactionDao {
             ps.setString(1, accountNumber);
             ps.setInt(2, limit);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    results.add(mapRow(rs));
+            try (ResultSet resultSet = ps.executeQuery()) {
+                while (resultSet.next()) {
+                    results.add(mapRow(resultSet));
                 }
             }
             return results;

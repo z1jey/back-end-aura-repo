@@ -12,6 +12,7 @@ import org.example.util.InputValidator;
 import org.example.util.ReferenceNumberGenerator;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Scanner;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -20,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 
 public class TransactionService {
 
-    private static final int MINI_STATEMENT = 10;
+    private static final int MINI_STATEMENT = 5;
     private static final DateTimeFormatter DISPLAY_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final AccountDao accountDao;
@@ -82,6 +83,7 @@ public class TransactionService {
             String accountNumber = input.nextLine();
             if(!InputValidator.isNotEmpty(accountNumber)){
                 System.out.println("[ERROR] Account Number Cannot be empty.");
+                return;
             }
 
             Account account = accountService.findAccountOrThrow(accountNumber);
@@ -92,7 +94,6 @@ public class TransactionService {
             }
 
             BigDecimal deposit = new BigDecimal(amountDeposit);
-            validateSufficientBalance(account, deposit);
             BigDecimal newBalance = account.getBalance().add(deposit);
             accountDao.updateBalance(account.getAccountNumber(), newBalance);
 
@@ -102,7 +103,7 @@ public class TransactionService {
             transactionDao.save(transaction);
             System.out.println("[SUCCESS] Deposit Successful!");
             printTransactionReceipt(transaction, account.getAccountFirstName() + " "+ account.getAccountLastName());
-        } catch (AccountNotFoundException | InsufficientBalanceException exception) {
+        } catch (AccountNotFoundException exception) {
             System.out.println("[ERROR]  " + exception.getMessage());
         } catch (SQLException sqlException) {
             System.out.println("[ERROR] " +  sqlException);
@@ -167,7 +168,7 @@ public class TransactionService {
                                                     transfer, newSenderBalance, sharedRef,
                 "Transfer to " + receiverAccount + " (" + receiver.getAccountFirstName() + " " + receiver.getAccountLastName() + ") " );
         Transaction receiverTransaction = new Transaction(receiverAccount, TransactionType.TRANSFER_IN, transfer,
-                                                            newReceiverBalance, sharedRef,
+                                                            newReceiverBalance, ReferenceNumberGenerator.generate(),
                 "Transfer from " + senderAccount + " (" + sender.getAccountFirstName() + " " + sender.getAccountLastName() + ") " );
 
         try (Connection connection = DbConnection.getConnection()) {
@@ -181,6 +182,7 @@ public class TransactionService {
                 connection.commit();
 
                 System.out.println("\n[SUCCESS] Fund transfer completed!");
+                printTransactionReceipt(receiverTransaction, sender.getAccountFirstName() + " "+ sender.getAccountLastName());
 
             } catch (SQLException exception) {
                 try {
@@ -206,8 +208,71 @@ public class TransactionService {
     }
 
     public void viewTransaction(){
+        System.out.println("\n========= TRANSACTION HISTORY =========");
 
+        try {
+            System.out.print("Enter Account Number: ");
+            String accountNumber = input.nextLine();
+            if(!InputValidator.isNotEmpty(accountNumber)){
+                System.out.println("[ERROR] Account Number Cannot be empty.");
+                return;
+            }
+
+            Account account = accountService.findAccountOrThrow(accountNumber);
+            List<Transaction> transactions = transactionDao.findByAccountTransaction(accountNumber);
+            System.out.println("\n  Account : " + account.getAccountNumber());
+            System.out.println("  Name    : " + account.getAccountFirstName() + " " +account.getAccountLastName());
+            System.out.printf("  Balance : PHP %.2f%n%n", account.getBalance());
+
+            if(transactions.isEmpty()) {
+                System.out.println("No transaction found on this account: " + accountNumber);
+                return;
+            }
+
+            System.out.printf("%nTransaction History — %s%n", accountNumber);
+            printTransactionsTable(transactions);
+
+        } catch (AccountNotFoundException exception) {
+            System.out.println("[ERROR]  " + exception.getMessage());
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to fetch Transaction History ");
+            System.out.println("[ERROR] " +  sqlException.getMessage());
+        }
     }
+
+    public void miniStatement(){
+        System.out.println("\n========= MINI STATEMENT (Last " + MINI_STATEMENT + " Transactions) =========");
+        try {
+            System.out.print("Enter Account Number: ");
+            String accountNumber = input.nextLine();
+            if(!InputValidator.isNotEmpty(accountNumber)){
+                System.out.println("[ERROR] Account Number Cannot be empty.");
+                return;
+            }
+
+            Account account = accountService.findAccountOrThrow(accountNumber);
+            List<Transaction> transactions = transactionDao.findByRecentTransaction(accountNumber, MINI_STATEMENT);
+
+            System.out.println("\n  Account : " + account.getAccountNumber());
+            System.out.println("  Name    : " + account.getAccountFirstName() + " " +account.getAccountLastName());
+            System.out.printf("  Balance : PHP %.2f%n%n", account.getBalance());
+
+            if(transactions.isEmpty()) {
+                System.out.println("No transaction found on this account: " + accountNumber);
+                return;
+            }
+
+            System.out.printf("%nTransaction History — %s%n", accountNumber);
+            printTransactionsTable(transactions);
+
+        } catch (AccountNotFoundException exception) {
+            System.out.println("[ERROR]  " + exception.getMessage());
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to fetch mini statement ");
+            System.out.println("[ERROR] " +  sqlException.getMessage());
+        }
+    }
+
 
     private void validateSufficientBalance(Account account, BigDecimal amount)
             throws InsufficientBalanceException {
@@ -229,5 +294,27 @@ public class TransactionService {
             System.out.println("  Remarks       : " + transaction.getRemarks());
         }
         System.out.println("  ----------------------------------");
+    }
+
+    private void printTransactionsTable(List<Transaction> transactions) {
+        String line = "+----+---------------------+--------------+--------------+--------------+---------------------+";
+        System.out.println(line);
+        System.out.printf("| %-2s | %-19s | %-12s | %-12s | %-12s | %-19s |%n",
+                "No", "Reference", "Type", "Amount", "Balance Aftr", "Date/Time");
+        System.out.println(line);
+
+        int i = 1;
+        for (Transaction t : transactions) {
+            System.out.printf("| %-2d | %-19s | %-12s | %12.2f | %12.2f | %-19s |%n",
+                    i++,
+                    t.getReferenceNumber().length() > 19
+                            ? t.getReferenceNumber().substring(0, 19) : t.getReferenceNumber(),
+                    t.getTransactionType().displayName(),
+                    t.getAmount(),
+                    t.getBalanceAfter(),
+                    t.getCreated_at() != null ? t.getCreated_at().format(DISPLAY_FORMAT) : "—"
+            );
+        }
+        System.out.println(line);
     }
 }

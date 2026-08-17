@@ -33,6 +33,6 @@ public class Main {
 //        accountService.createAccountService()
 //        accountService.balanceInquiry();
 //            accountService.listAccounts();
-        transactionService.deposit();
+        transactionService.miniStatement();
     }
 }

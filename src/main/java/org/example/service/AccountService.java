@@ -115,6 +115,56 @@ public class AccountService {
         }
     }
 
+    public void deleteAccountService() {
+        System.out.println("\n========= DELETE ACCOUNT =========");
+
+        System.out.print("Enter Account Number: ");
+        String accountNumber = scanner.nextLine().trim();
+
+        if (!InputValidator.isNotEmpty(accountNumber)) {
+            System.out.println("[ERROR] Account Number cannot be empty.");
+            return;
+        }
+
+        try {
+            Account account = findAccountOrThrow(accountNumber);
+            System.out.println("\nAccount Information");
+            System.out.println("Account Number : " + account.getAccountNumber());
+            System.out.println("Account Name   : "  + account.getAccountFirstName() + " " + account.getAccountLastName());
+            System.out.println("Contact Number : " + account.getAccountContactNumber());
+            System.out.printf("Balance        : PHP %.2f%n", account.getBalance());
+
+            if (account.getBalance().compareTo(BigDecimal.ZERO) != 0) {
+                System.out.println("[ERROR] Account cannot be deleted while it has a remaining balance." );
+                System.out.printf("[INFO] Remaining Balance: PHP %.2f%n", account.getBalance());
+                return;
+            }
+
+            System.out.print("\nAre you sure you want to delete account : " + accountNumber + " [Y / N]: ");
+            String confirmation = scanner.nextLine().trim();
+
+            if (!InputValidator.isNotEmpty(confirmation)) {
+                System.out.println("[ERROR] Confirmation cannot be empty.");
+                return;
+            }
+
+            if (!confirmation.equalsIgnoreCase("Y")) {
+                System.out.println("[INFO] Account deletion cancelled.");
+                return;
+            }
+
+            // Delete account
+            accountDao.deleteAccount(accountNumber);
+            System.out.println("[SUCCESS] Account deleted successfully!");
+
+        } catch (AccountNotFoundException exception) {
+            System.out.println("[ERROR] " + exception.getMessage());
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to delete account.");
+            System.out.println("[ERROR] " + sqlException.getMessage());
+        }
+    }
+
     //helpers
     private String generateAccountNumber() {
         long seed = System.currentTimeMillis() % 1_000_000_000L;
