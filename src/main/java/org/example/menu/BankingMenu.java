@@ -62,11 +62,14 @@ public class BankingMenu {
                     accountService.deleteAccountService();
                     break;
                 case "11":
+                    accountService.viewArchivedAccounts();
+                    break;
+                case "12":
                     running = false;
                     System.out.println("\nThank you for using the Banking Management System. Goodbye!");
                     break;
                 default:
-                    System.out.println("[ERROR] Invalid choice. Please select from 1-11.");
+                    System.out.println("[ERROR] Invalid choice. Please select from 1-12.");
             }
         }
     }
@@ -87,7 +90,8 @@ public class BankingMenu {
         System.out.println(" 8. List All Accounts");
         System.out.println(" 9. Search Account");
         System.out.println("10. Delete Account");
-        System.out.println("11. Exit");
+        System.out.println("11. Archived Accounts");
+        System.out.println("12. Exit");
         System.out.println("==================================");
     }
 }
