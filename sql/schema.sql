@@ -33,29 +33,35 @@ SET FOREIGN_KEY_CHECKS = 0;
 --
 -- Stores the login credentials for users who are allowed to access
 -- the Banking Management System.
---
--- For this project, only ONE login account is intended to be used.
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS users (
-                                     user_id      BIGINT          NOT NULL AUTO_INCREMENT
+CREATE TABLE IF NOT EXISTS users (user_id BIGINT NOT NULL AUTO_INCREMENT
                                      COMMENT 'Unique identifier for the login user',
-                                     username     VARCHAR(50)     NOT NULL
-COMMENT 'Username used to log in',
-password     VARCHAR(255)    NOT NULL
-COMMENT 'Password used to log in',
+                                     admin_name   VARCHAR(100)    NOT NULL
+    COMMENT 'Name of the administrator',
 
-created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
-COMMENT 'Date and time the login user was created',
+    username     VARCHAR(50)     NOT NULL
 
--- Constraints
-CONSTRAINT pk_users          PRIMARY KEY (user_id),
-CONSTRAINT uq_users_username UNIQUE (username)
+    COMMENT 'Username used to log in',
 
-) ENGINE = InnoDB
-DEFAULT CHARSET = utf8mb4
-COLLATE = utf8mb4_unicode_ci
-AUTO_INCREMENT = 1
-COMMENT = 'Application login users';
+    password     VARCHAR(255)    NOT NULL
+
+    COMMENT 'Password used to log in',
+
+    created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
+    COMMENT 'Date and time the login user was created',
+
+    -- Constraints
+    CONSTRAINT pk_users
+    PRIMARY KEY (user_id),
+
+    CONSTRAINT uq_users_username
+    UNIQUE (username)
+
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci
+    AUTO_INCREMENT = 1
+    COMMENT = 'Application login users';
 
 
 -- =============================================================================

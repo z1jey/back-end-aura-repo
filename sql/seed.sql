@@ -27,8 +27,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Single login account for the Banking Management System.
 -- ===========================================================================
 
-INSERT INTO users (username, password)
-VALUES ('admin', 'admin123')
+INSERT INTO users (admin_name, username, password)
+VALUES ('Administrator', 'admin', 'admin123')
     ON DUPLICATE KEY UPDATE username = username;
 
 -- ===========================================================================

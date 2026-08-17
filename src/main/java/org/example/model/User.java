@@ -3,17 +3,24 @@ import java.time.LocalDateTime;
 
 public class User {
     private long userId;
+    private String adminName;
     private String username;
     private String password;
     private LocalDateTime createdAt;
 
-    public User(String username, String password){
+    public User(String adminName, String username, String password) {
+        this.adminName = adminName;
         this.username = username;
         this.password = password;
     }
 
-    public User(long userId, String username, String password, LocalDateTime createdAt) {
+    public User( long userId, String adminName,
+            String username,
+            String password,
+            LocalDateTime createdAt) {
+
         this.userId = userId;
+        this.adminName = adminName;
         this.username = username;
         this.password = password;
         this.createdAt = createdAt;
@@ -25,6 +32,14 @@ public class User {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public String getAdminName() {
+        return adminName;
+    }
+
+    public void setAdminName(String adminName) {
+        this.adminName = adminName;
     }
 
     public String getUsername() {
