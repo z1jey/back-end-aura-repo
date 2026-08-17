@@ -1,5 +1,5 @@
 package org.example.service;
-
+import org.example.model.AccountStatus;
 import org.example.dao.AccountDao;
 import org.example.model.Account;
 import org.example.util.InputValidator;
@@ -46,7 +46,7 @@ public class AccountService {
         String contactNumber = scanner.nextLine();
         //contact number empty validation
         if(!InputValidator.isNotEmpty(contactNumber)) {
-            System.out.println("[ERROR] Contact Number cannot be empty!");
+            System.out.println("[ERROR] Contact Number cannot be empty.");
             return;
         }
         //contact number checker validation
@@ -85,8 +85,11 @@ public class AccountService {
         System.out.println("\n========= BALANCE INQUIRY =========");
 
         System.out.print("Enter account number: ");
-        String accountNumber = scanner.nextLine().trim();
-
+        String accountNumber = scanner.nextLine();
+        if(!InputValidator.isNotEmpty(accountNumber)){
+            System.out.println("[ERROR] Account Number cannot be empty.");
+            return;
+        }
         try{
             Account account = findAccountOrThrow(accountNumber);
             System.out.println("\n[SUCCESS] Balance Inquiry");
@@ -128,6 +131,11 @@ public class AccountService {
 
         try {
             Account account = findAccountOrThrow(accountNumber);
+            //check if the account is already archived before soft deleting it.
+            if (account.getAccountStatus() != AccountStatus.ACTIVE) {
+                System.out.println("[ERROR] This account is already archived.");
+                return;
+            }
             System.out.println("\nAccount Information");
             System.out.println("Account Number : " + account.getAccountNumber());
             System.out.println("Account Name   : "  + account.getAccountFirstName() + " " + account.getAccountLastName());
@@ -139,6 +147,9 @@ public class AccountService {
                 System.out.printf("[INFO] Remaining Balance: PHP %.2f%n", account.getBalance());
                 return;
             }
+            System.out.println("\n[INFO] This is a soft delete.");
+            System.out.println("[INFO] The account will be closed and moved to Archived Accounts.");
+            System.out.println("[INFO] The account and its transaction history will be preserved.");
 
             System.out.print("\nAre you sure you want to delete account : " + accountNumber + " [Y / N]: ");
             String confirmation = scanner.nextLine().trim();
@@ -153,9 +164,10 @@ public class AccountService {
                 return;
             }
 
-            // Delete account
+            //Soft Delete account
             accountDao.deleteAccount(accountNumber);
-            System.out.println("[SUCCESS] Account deleted successfully!");
+            System.out.println("\n[SUCCESS] Account deleted successfully!");
+            System.out.println("[INFO] Account has been moved to Archived Accounts.");
 
         } catch (AccountNotFoundException exception) {
             System.out.println("[ERROR] " + exception.getMessage());

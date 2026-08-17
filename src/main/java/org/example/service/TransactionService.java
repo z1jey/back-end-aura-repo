@@ -50,7 +50,10 @@ public class TransactionService {
             Account account = accountService.findAccountOrThrow(accountNumber);
             System.out.print("Enter withdrawal Amount: ");
             String withdrawAmount = input.nextLine();
-
+            if(!InputValidator.isNotEmpty(withdrawAmount)){
+                System.out.println("[ERROR] Withdrawal amount cannot be empty.");
+                return;
+            }
             if(!InputValidator.isPositiveAmount(withdrawAmount)) {
                 return;
             }
@@ -125,7 +128,7 @@ public class TransactionService {
                 System.out.println("[ERROR] Sender account cannot be empty");
                 return;
             }
-            System.out.println("Enter receiver Account: ");
+            System.out.print("Enter receiver Account: ");
             receiverAccount = input.nextLine().trim();
 
             if(!InputValidator.isNotEmpty(receiverAccount)){
@@ -134,9 +137,7 @@ public class TransactionService {
             }
 
             if (senderAccount.equalsIgnoreCase(receiverAccount)) {
-                throw new InvalidTransactionException(
-                        "Sender and receiver cannot be the same account."
-                );
+                throw new InvalidTransactionException("Sender and receiver cannot be the same account.");
             }
 
             sender = accountService.findAccountOrThrow(senderAccount);
@@ -144,6 +145,10 @@ public class TransactionService {
 
             System.out.print("Enter transfer amount: ");
             String transferAmount = input.nextLine();
+            if(!InputValidator.isNotEmpty(transferAmount)){
+                System.out.println("[ERROR] Transfer Amount cannot be empty.");
+                return;
+            }
             if(!InputValidator.isPositiveAmount(transferAmount)){
                 return;
             }
@@ -181,8 +186,11 @@ public class TransactionService {
                 transactionDao.save(connection, receiverTransaction);
                 connection.commit();
 
-                System.out.println("\n[SUCCESS] Fund transfer completed!");
-                printTransactionReceipt(receiverTransaction, sender.getAccountFirstName() + " "+ sender.getAccountLastName());
+                System.out.println("\n========= SENDER =========");
+                printTransactionReceipt(senderTransaction,sender.getAccountFirstName() + " " + sender.getAccountLastName());
+
+                System.out.println("\n========= RECEIVER =========");
+                printTransactionReceipt(receiverTransaction, receiver.getAccountFirstName() + " " + receiver.getAccountLastName());
 
             } catch (SQLException exception) {
                 try {
@@ -262,7 +270,7 @@ public class TransactionService {
                 return;
             }
 
-            System.out.printf("%nTransaction History — %s%n", accountNumber);
+            System.out.printf("%nLast 5 Transaction History — %s%n", accountNumber);
             printTransactionsTable(transactions);
 
         } catch (AccountNotFoundException exception) {

@@ -1,4 +1,3 @@
-
 -- =============================================================================
 -- Banking Management System
 -- schema.sql - Database + Table Definitions
@@ -34,20 +33,20 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- Stores the login credentials for users who are allowed to access
 -- the Banking Management System.
 -- =============================================================================
-CREATE TABLE IF NOT EXISTS users (user_id BIGINT NOT NULL AUTO_INCREMENT
+CREATE TABLE IF NOT EXISTS users (
+                                     user_id BIGINT NOT NULL AUTO_INCREMENT
                                      COMMENT 'Unique identifier for the login user',
-                                     admin_name   VARCHAR(100)    NOT NULL
+
+                                     admin_name VARCHAR(100) NOT NULL
     COMMENT 'Name of the administrator',
 
-    username     VARCHAR(50)     NOT NULL
-
+    username VARCHAR(50) NOT NULL
     COMMENT 'Username used to log in',
 
-    password     VARCHAR(255)    NOT NULL
-
+    password VARCHAR(255) NOT NULL
     COMMENT 'Password used to log in',
 
-    created_at   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
     COMMENT 'Date and time the login user was created',
 
     -- Constraints
@@ -72,42 +71,65 @@ CREATE TABLE IF NOT EXISTS users (user_id BIGINT NOT NULL AUTO_INCREMENT
 -- balance-inquiry queries never need to aggregate the transactions table.
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS accounts (
-    account_id       BIGINT          NOT NULL AUTO_INCREMENT
-                                    COMMENT 'Surrogate primary key',
-    account_number   VARCHAR(20)     NOT NULL
-                                    COMMENT 'Human-readable unique identifier (e.g. ACC-0001000001)',
+                                        account_id       BIGINT          NOT NULL AUTO_INCREMENT
+                                        COMMENT 'Surrogate primary key',
+
+                                        account_number   VARCHAR(20)     NOT NULL
+    COMMENT 'Human-readable unique identifier (e.g. ACC-0001000001)',
+
     first_name       VARCHAR(50)     NOT NULL
-                                    COMMENT 'First name of the account holder',
+    COMMENT 'First name of the account holder',
+
     last_name        VARCHAR(50)     NOT NULL
-                                    COMMENT 'Last name of the account holder',
+    COMMENT 'Last name of the account holder',
+
     contact_number   VARCHAR(20)     NOT NULL
-                                    COMMENT 'Contact number of the account holder',
+    COMMENT 'Contact number of the account holder',
+
     balance          DECIMAL(15, 2)  NOT NULL DEFAULT 0.00
-                                    COMMENT 'Current available balance - always >= 0',
+    COMMENT 'Current available balance - always >= 0',
+
+    account_status   VARCHAR(20)     NOT NULL DEFAULT 'ACTIVE'
+    COMMENT 'Account status: ACTIVE or ARCHIVED',
+
     created_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
-                                    COMMENT 'Row creation timestamp (UTC)',
+    COMMENT 'Row creation timestamp (UTC)',
+
     updated_at       DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
-                                    ON UPDATE CURRENT_TIMESTAMP
-                                    COMMENT 'Last modification timestamp (auto-updated)',
+    ON UPDATE CURRENT_TIMESTAMP
+    COMMENT 'Last modification timestamp (auto-updated)',
 
     -- Constraints
-    CONSTRAINT pk_accounts          PRIMARY KEY (account_id),
-    CONSTRAINT uq_account_number    UNIQUE (account_number),
-    CONSTRAINT chk_balance_positive CHECK (balance >= 0)
+    CONSTRAINT pk_accounts
+    PRIMARY KEY (account_id),
 
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci
-  AUTO_INCREMENT = 1
-  COMMENT = 'Bank account master data';
+    CONSTRAINT uq_account_number
+    UNIQUE (account_number),
+
+    CONSTRAINT chk_balance_positive
+    CHECK (balance >= 0),
+
+    CONSTRAINT chk_account_status
+    CHECK (account_status IN ('ACTIVE', 'ARCHIVED'))
+
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci
+    AUTO_INCREMENT = 1
+    COMMENT = 'Bank account master data';
 
 
 -- Covers the WHERE clause in every DAO lookup by account number
 CREATE INDEX idx_accounts_number
     ON accounts (account_number);
+
 -- Useful for admin queries ordered by creation date
 CREATE INDEX idx_accounts_created_at
     ON accounts (created_at);
+
+-- Useful for finding active and archived accounts
+CREATE INDEX idx_accounts_status
+    ON accounts (account_status);
 
 
 -- =============================================================================
@@ -125,45 +147,56 @@ CREATE INDEX idx_accounts_created_at
 -- field for traceability.
 -- =============================================================================
 CREATE TABLE IF NOT EXISTS transactions (
-    transaction_id      BIGINT          NOT NULL AUTO_INCREMENT
-                                        COMMENT 'Surrogate primary key',
+                                            transaction_id      BIGINT          NOT NULL AUTO_INCREMENT
+                                            COMMENT 'Surrogate primary key',
 
-    account_number      VARCHAR(20)     NOT NULL
-                                        COMMENT 'Owning account (denormalised for query speed)',
+                                            account_number      VARCHAR(20)     NOT NULL
+    COMMENT 'Owning account (denormalised for query speed)',
 
     transaction_type    ENUM(
-                            'DEPOSIT',
-                            'WITHDRAW',
-                            'TRANSFER_IN',
-                            'TRANSFER_OUT'
-                        )               NOT NULL
-                                        COMMENT 'Category of financial event',
+                                'DEPOSIT',
+                                'WITHDRAW',
+                                'TRANSFER_IN',
+                                'TRANSFER_OUT'
+                            )               NOT NULL
+    COMMENT 'Category of financial event',
 
     amount              DECIMAL(15, 2)  NOT NULL
-                                        COMMENT 'Absolute (positive) monetary amount',
+    COMMENT 'Absolute (positive) monetary amount',
+
     balance_after       DECIMAL(15, 2)  NOT NULL
-                                        COMMENT 'Account balance snapshot immediately after this event',
+    COMMENT 'Account balance snapshot immediately after this event',
+
     reference_number    VARCHAR(30)     NOT NULL
-                                        COMMENT 'Globally unique business reference (TXNyyyyMMddHHmmss + seq)',
+    COMMENT 'Globally unique business reference (TXNyyyyMMddHHmmss + seq)',
+
     remarks             VARCHAR(255)    NULL
-                                        COMMENT 'Optional description - e.g. counterparty info for transfers',
+    COMMENT 'Optional description - e.g. counterparty info for transfers',
+
     created_at          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP
-                                        COMMENT 'Event timestamp (UTC)',
+    COMMENT 'Event timestamp (UTC)',
 
     -- Constraints
-    CONSTRAINT pk_transactions          PRIMARY KEY (transaction_id),
-    CONSTRAINT uq_reference_number      UNIQUE (reference_number),
-    CONSTRAINT chk_amount_positive      CHECK (amount > 0),
-    CONSTRAINT fk_txn_account_number    FOREIGN KEY (account_number)
-        REFERENCES accounts (account_number)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
+    CONSTRAINT pk_transactions
+    PRIMARY KEY (transaction_id),
 
-) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci
-  AUTO_INCREMENT = 1
-  COMMENT = 'Append-only financial event ledger';
+    CONSTRAINT uq_reference_number
+    UNIQUE (reference_number),
+
+    CONSTRAINT chk_amount_positive
+    CHECK (amount > 0),
+
+    CONSTRAINT fk_txn_account_number
+    FOREIGN KEY (account_number)
+    REFERENCES accounts (account_number)
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE
+
+    ) ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci
+    AUTO_INCREMENT = 1
+    COMMENT = 'Append-only financial event ledger';
 
 
 -- Primary lookup pattern: all transactions for an account, newest first
@@ -184,8 +217,8 @@ CREATE INDEX idx_txn_type
 -- ---------------------------------------------------------------------------
 SET FOREIGN_KEY_CHECKS = 1;
 
+
 -- ---------------------------------------------------------------------------
 -- 5. Verification: show created objects
 -- ---------------------------------------------------------------------------
 SHOW TABLES;
-

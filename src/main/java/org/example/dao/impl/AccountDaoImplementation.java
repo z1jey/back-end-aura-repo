@@ -3,7 +3,7 @@ package org.example.dao.impl;
 import org.example.config.DbConnection;
 import org.example.dao.AccountDao;
 import org.example.model.Account;
-
+import org.example.model.AccountStatus;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class AccountDaoImplementation implements AccountDao {
     private static final String SQL_UPDATE_BALANCE =
             "UPDATE accounts SET balance = ? WHERE account_number = ?";
     private static final String SQL_DELETE_ACCOUNT =
-            "DELETE FROM accounts WHERE account_number = ?";
+            "UPDATE accounts SET account_status = ? WHERE account_number = ?";
 
     @Override
     public void createAccount(Account account) throws SQLException {
@@ -118,20 +118,22 @@ public class AccountDaoImplementation implements AccountDao {
 
     @Override
     public void deleteAccount(String accountNumber) throws SQLException {
-
         try (Connection connection = DbConnection.getConnection();
              PreparedStatement preparedStatement = connection.prepareStatement(SQL_DELETE_ACCOUNT)) {
-            preparedStatement.setString(1, accountNumber);
+
+            preparedStatement.setString(1, AccountStatus.ARCHIVED.name());
+            preparedStatement.setString(2, accountNumber);
+
             int rowsAffected = preparedStatement.executeUpdate();
 
             if (rowsAffected == 0) {
-                throw new SQLException("[WARNING] No account found to delete: " + accountNumber);
+                throw new SQLException(
+                        "[WARNING] No account found to delete: " + accountNumber
+                );
             }
 
-            System.out.println("[SUCCESS] Account deleted successfully: " + accountNumber);
-
         } catch (SQLException sqlException) {
-            System.out.println("[ERROR] Failed to delete account: " + accountNumber );
+            System.out.println("[ERROR] Failed to delete account: " + accountNumber);
             System.out.println("[ERROR] " + sqlException.getMessage());
             throw sqlException;
         }
@@ -147,6 +149,8 @@ public class AccountDaoImplementation implements AccountDao {
         account.setAccountLastName(resultSet.getString("last_name"));
         account.setAccountContactNumber(resultSet.getString("contact_number"));
         account.setBalance(resultSet.getBigDecimal("balance"));
+
+        account.setAccountStatus(AccountStatus.valueOf(resultSet.getString("account_status")));
 
         Timestamp createdAt = resultSet.getTimestamp("created_at");
         if (createdAt != null) {
