@@ -222,10 +222,30 @@ public class AccountService {
                 return;
             }
 
-            printArchivedAccountsTable(archivedAccounts);
+            printAccountsTable(archivedAccounts);
 
         } catch (SQLException sqlException) {
             System.out.println("[ERROR] Failed to retrieve archived accounts.");
+            System.out.println("[ERROR] " + sqlException.getMessage());
+        }
+    }
+
+    public void listActiveAccounts() {
+
+        System.out.println("\n========= ACTIVE ACCOUNTS =========");
+        try {
+            List<Account> accountList =
+             accountDao.findActiveAccounts();
+
+            if (!InputValidator.isListNotEmpty(accountList)) {
+                System.out.println("[INFO] No active accounts found.");
+                return;
+            }
+
+            printAccountsTable(accountList);
+
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to retrieve active accounts.");
             System.out.println("[ERROR] " + sqlException.getMessage());
         }
     }
@@ -239,8 +259,8 @@ public class AccountService {
     private void printAccountSummary(Account account) {
         System.out.println("  Account Number : " + account.getAccountNumber());
         System.out.println("  Account Name   : " + account.getAccountFirstName() + " " + account.getAccountLastName());
-        System.out.println("  Account Contact Number: " + account.getAccountContactNumber());
-        System.out.printf("  Balance        : PHP %.2f%n", account.getBalance());
+        System.out.println("  Contact Number : " + account.getAccountContactNumber());
+        System.out.printf("   Balance        : PHP %.2f%n", account.getBalance());
         if (account.getCreatedAt() != null) {
             System.out.println("  Created At     : " + account.getCreatedAt());
         }
@@ -252,34 +272,6 @@ public class AccountService {
     }
 
     private void printAccountsTable(List<Account> accounts) {
-        String line = "+----+-----------------------+-------------------------+---------------+---------------+---------------------+";
-
-        System.out.println(line);
-        System.out.printf("| %-2s | %-21s | %-23s | %-13s | %-13s | %-19s |%n",
-                "No", "Account Number", "Account Name", "Contact Number", "Balance (PHP)", "Created At");
-        System.out.println(line);
-
-        int i = 1;
-
-        for (Account a : accounts) {
-            String accountName = a.getAccountFirstName() + " " + a.getAccountLastName();
-            System.out.printf("| %-2d | %-21s | %-23s | %-13s | %13.2f | %-19s |%n",
-                    i++,
-                    a.getAccountNumber(),
-                    accountName,
-                    a.getAccountContactNumber(),
-                    a.getBalance(),
-                    a.getCreatedAt() != null
-                            ? a.getCreatedAt().toString().replace("T", " ")
-                            : "—"
-            );
-        }
-
-        System.out.println(line);
-        System.out.println("  Total accounts: " + accounts.size());
-    }
-
-    private void printArchivedAccountsTable(List<Account> accounts) {
 
         String line =  "+----+-----------------------+-------------------------+---------------+---------------+------------+---------------------+";
         System.out.println(line);
@@ -296,22 +288,22 @@ public class AccountService {
 
         System.out.println(line);
         int i = 1;
-        for (Account account : accounts) {
-            String accountName = account.getAccountFirstName() + " " + account.getAccountLastName();
+        for (Account a : accounts) {
+            String accountName = a.getAccountFirstName() + " " + a.getAccountLastName();
             System.out.printf(
                     "| %-2d | %-21s | %-23s | %-13s | %13.2f | %-10s | %-19s |%n",
                     i++,
-                    account.getAccountNumber(),
+                    a.getAccountNumber(),
                     accountName,
-                    account.getAccountContactNumber(),
-                    account.getBalance(),
-                    account.getAccountStatus(),
-                    account.getCreatedAt() != null
-                            ? account.getCreatedAt().toString().replace("T", " ")
+                    a.getAccountContactNumber(),
+                    a.getBalance(),
+                    a.getAccountStatus(),
+                    a.getCreatedAt() != null
+                            ? a.getCreatedAt().toString().replace("T", " ")
                             : "—"
             );
         }
         System.out.println(line);
-        System.out.println("  Total archived accounts: " + accounts.size());
+        System.out.println("  Total accounts: " + accounts.size());
     }
 }

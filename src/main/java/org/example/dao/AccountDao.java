@@ -16,5 +16,6 @@ public interface AccountDao {
     void updateBalance(Connection connection, String accountNumber,BigDecimal balance) throws SQLException;
     void deleteAccount(String accountNumber) throws SQLException;
     List<Account> findArchivedAccounts() throws SQLException;
+    List<Account> findActiveAccounts() throws SQLException;
 }
 

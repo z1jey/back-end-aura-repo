@@ -12,6 +12,7 @@ import java.util.Scanner;
 public class BankingMenu {
 
     private final AccountService accountService;
+    private final ViewAccountMenu viewAccountMenu;
     private final TransactionService transactionService;
     private final Scanner scanner;
 
@@ -20,6 +21,7 @@ public class BankingMenu {
         AccountDao accountDao = new AccountDaoImplementation();
         TransactionDao transactionDao = new TransactionDaoImplementation();
         this.accountService = new AccountService(accountDao, scanner );
+        this.viewAccountMenu = new ViewAccountMenu(accountService, scanner);
         this.transactionService = new TransactionService(accountDao, transactionDao, scanner, accountService);
     }
 
@@ -53,7 +55,7 @@ public class BankingMenu {
                     transactionService.miniStatement();
                     break;
                 case "8":
-                    accountService.listAccounts();
+                    viewAccountMenu.startViewAccountMenu();
                     break;
                 case "9":
                     accountService.searchAccountService();
@@ -62,9 +64,6 @@ public class BankingMenu {
                     accountService.deleteAccountService();
                     break;
                 case "11":
-                    accountService.viewArchivedAccounts();
-                    break;
-                case "12":
                     running = false;
                     System.out.println("\nThank you for using the Banking Management System. Goodbye!");
                     break;
@@ -87,7 +86,7 @@ public class BankingMenu {
         System.out.println(" 5. Transfer");
         System.out.println(" 6. Transaction History");
         System.out.println(" 7. Mini Statement");
-        System.out.println(" 8. List All Accounts");
+        System.out.println(" 8. View Accounts");
         System.out.println(" 9. Search Account");
         System.out.println("10. Delete Account");
         System.out.println("11. Archived Accounts");
