@@ -1,7 +1,6 @@
 package org.example.dao.impl;
-
-import org.example.config.DbConnection;
 import org.example.dao.TransactionDao;
+import org.example.config.DbConnection;
 import org.example.model.Transaction;
 import org.example.model.TransactionType;
 import java.sql.*;
@@ -33,14 +32,14 @@ public class TransactionDaoImplementation implements TransactionDao {
 
     @Override
     public void save(Connection connection, Transaction transaction) throws SQLException {
-        try(Connection connection1 = DbConnection.getConnection();
-            PreparedStatement preparedStatement = connection.prepareStatement(SQL_INSERT_TRANSACTION)){
+        try(PreparedStatement preparedStatement = connection.prepareStatement(SQL_INSERT_TRANSACTION, Statement.RETURN_GENERATED_KEYS)){
             preparedStatement.setString(1, transaction.getAccountNumber());
             preparedStatement.setString(2, transaction.getTransactionType().name());
             preparedStatement.setBigDecimal(3, transaction.getAmount());
             preparedStatement.setBigDecimal(4, transaction.getBalanceAfter());
             preparedStatement.setString(5, transaction.getReferenceNumber());
             preparedStatement.setString(6, transaction.getRemarks());
+                preparedStatement.executeUpdate();
 
             try(ResultSet keys = preparedStatement.getGeneratedKeys()){
                 if (keys.next()) {
@@ -49,9 +48,6 @@ public class TransactionDaoImplementation implements TransactionDao {
             }
 
             System.out.println("[SUCCESS] Transaction have been saved: " + transaction.getReferenceNumber());
-        } catch (SQLException sqlException) {
-            System.out.println("[ERROR] Failed to save transaction");
-            System.out.println("[ERROR] " + sqlException.getMessage());
         }
     }
 

@@ -3,8 +3,7 @@ package org.example.service;
 import org.example.dao.AccountDao;
 import org.example.model.Account;
 import org.example.util.InputValidator;
-
-import javax.security.auth.login.AccountNotFoundException;
+import org.example.exception.AccountNotFoundException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
@@ -63,12 +62,11 @@ public class AccountService {
             System.out.println("[ERROR] Initial Amount cannot be empty!");
             return;
         }
-        BigDecimal initialDeposit = new BigDecimal(initialBalance);
-        //amount checker validation
         if(!InputValidator.isAmountValid(initialBalance)){
             return;
         }
-
+        BigDecimal initialDeposit = new BigDecimal(initialBalance);
+        //amount checker validation
         String accountNumber = generateAccountNumber();
         Account account = new Account(accountNumber, firstName, lastName, contactNumber, initialDeposit);
 

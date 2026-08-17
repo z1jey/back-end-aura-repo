@@ -43,4 +43,20 @@ public class InputValidator {
         }
         return true;
     }
+
+    public static boolean isPositiveAmount(String amount){
+        try {
+            BigDecimal bigDecimal = new BigDecimal(amount);
+            if(bigDecimal.compareTo(BigDecimal.ZERO) <= 0) {
+                System.out.println("[ERROR] The amount must be greater that zero. ");
+                return false;
+            }
+        } catch (NumberFormatException exception) {
+            System.out.println("[ERROR] Invalid Amount: " + amount);
+            return false;
+        }
+        return true;
+    }
+
+
 }

@@ -1,13 +1,10 @@
 package org.example;
 import org.example.dao.AccountDao;
+import org.example.dao.TransactionDao;
 import org.example.dao.impl.AccountDaoImplementation;
-import org.example.model.Account;
-import org.example.model.User;
-import org.example.dao.UserDao;
-import org.example.dao.impl.UserDaoImplementation;
+import org.example.dao.impl.TransactionDaoImplementation;
 import org.example.service.AccountService;
-import org.example.service.LoginService;
-
+import org.example.service.TransactionService;
 import java.util.Scanner;
 
 public class Main {
@@ -31,9 +28,11 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         AccountDao accountDao = new AccountDaoImplementation();
         AccountService accountService = new AccountService(accountDao, scanner);
-
-//        accountService.createAccountService();
+        TransactionDao transactionDao = new TransactionDaoImplementation();
+        TransactionService transactionService = new TransactionService(accountDao, transactionDao, scanner, accountService);
+//        accountService.createAccountService()
 //        accountService.balanceInquiry();
-            accountService.listAccounts();
+//            accountService.listAccounts();
+        transactionService.deposit();
     }
 }
