@@ -165,6 +165,40 @@ public class AccountService {
         }
     }
 
+    public void searchAccountService() {
+        System.out.println("\n========= SEARCH ACCOUNT =========");
+
+        System.out.print("Enter Account Number: ");
+        String accountNumber = scanner.nextLine().trim();
+
+        if (!InputValidator.isNotEmpty(accountNumber)) {
+            System.out.println("[ERROR] Account Number cannot be empty.");
+            return;
+        }
+
+        try {
+            Account account = findAccountOrThrow(accountNumber);
+            System.out.println("\n========= ACCOUNT FOUND =========");
+            System.out.println("Account Number : " + account.getAccountNumber());
+            System.out.println("First Name     : " + account.getAccountFirstName());
+            System.out.println("Last Name      : " + account.getAccountLastName());
+            System.out.println("Contact Number : " + account.getAccountContactNumber());
+            System.out.printf("Balance        : PHP %.2f%n", account.getBalance());
+
+            if (account.getCreatedAt() != null) {
+                System.out.println("Created At     : " + account.getCreatedAt());
+            } else {
+                System.out.println("Created At     : —");
+            }
+
+        } catch (AccountNotFoundException exception) {
+            System.out.println("[ERROR] " + exception.getMessage());
+        } catch (SQLException sqlException) {
+            System.out.println("[ERROR] Failed to search account.");
+            System.out.println("[ERROR] " + sqlException.getMessage());
+        }
+    }
+
     //helpers
     private String generateAccountNumber() {
         long seed = System.currentTimeMillis() % 1_000_000_000L;
