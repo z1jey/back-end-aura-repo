@@ -4,8 +4,6 @@ A simple Java-based Banking Management System that allows users to manage bank a
 
 This project was developed to demonstrate Java OOP, JDBC, MySQL database operations, input validation, exception handling, and basic database transaction management.
 
----
-
 ## Description
 
 The Banking Management System is a console-based application connected to a MySQL database.
@@ -14,7 +12,6 @@ The application allows an administrator to create and manage bank accounts, perf
 
 The system also includes administrator account creation, login, and account archiving through soft delete.
 
----
 
 ## Features
 
@@ -53,7 +50,6 @@ The system also includes administrator account creation, login, and account arch
 - Sender and receiver accounts must be different
 - Database errors are handled using exceptions
 
----
 
 ## Technologies Used
 
@@ -65,7 +61,6 @@ The system also includes administrator account creation, login, and account arch
 - **Git / GitHub**
 - **IntelliJ IDEA**
 
----
 # Database Setup
 
 The project uses **MySQL** as its database.
@@ -115,8 +110,6 @@ After the database has been created and the connection has been configured:
 6. Run `Main.java`.
 
 The application will start with the login menu.
-
----
 
 
 # Educational Purpose
