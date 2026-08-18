@@ -123,5 +123,3 @@ The application will start with the login menu.
 
 This project was created for educational purposes to demonstrate basic banking operations, Java programming, database connectivity, and database management concepts.
 It is not intended to be used as a real banking system.
-
----
